@@ -97,7 +97,44 @@ $app->withMiddleware(function ($middleware) {
 
 ---
 
-### 4. Customizing Excluded CSRF Routes
+### 4. Flash Messages & UI Toasts
+
+#### Setting Flash Messages (In Controllers or Code)
+```php
+// Fluent API
+flash()->success('Profile updated successfully!', 'Success');
+flash()->error('Payment verification failed.', 'Error');
+flash()->warning('Your plan will expire in 3 days.');
+flash()->info('Maintenance scheduled tonight.');
+
+// Or quick helper
+flash('success', 'Changes saved!');
+
+// In Controllers
+$this->flash('success', 'Profile updated!');
+$this->flash()->error('Invalid credentials');
+```
+
+#### Displaying Flash Messages in Views
+```html
+<!-- Responsive floating glassmorphic toast deck -->
+<flash />
+<!-- Or with custom position -->
+<flash mode="toast" position="top-right" />
+
+<!-- Or inline alert banner cards -->
+<flash mode="alert" />
+
+<!-- Or blade directive -->
+@flash
+```
+
+#### Automatic Switch Live SPA Reactivity
+When using `switch/live`, calling `flash('success', '...')` during an SPA request automatically triggers client-side toast notifications without requiring a full page refresh!
+
+---
+
+### 5. Customizing Excluded CSRF Routes
 
 ```php
 class CustomVerifyCsrfToken extends \Switch\Session\Middleware\VerifyCsrfToken

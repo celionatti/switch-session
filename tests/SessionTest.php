@@ -366,4 +366,68 @@ class SessionTest extends TestCase
         $this->assertEquals('en', $c->getValue());
         $this->assertTrue(SessionManager::getInstance()->getCookieJar()->hasQueued('lang'));
     }
+
+    public function testFlashBagAndHelpers(): void
+    {
+        $manager = new SessionManager(['driver' => 'array']);
+        SessionManager::setInstance($manager);
+        $store = $manager->store();
+        $store->start();
+        Session::setStore($store);
+
+        $bag = new \Switch\Session\Flash\FlashBag($store);
+        $bag->success('Profile updated successfully!', 'Success');
+        $bag->error('Failed to process payment.', 'Payment Error');
+
+        $this->assertTrue($bag->has('success'));
+        $this->assertTrue($bag->has('error'));
+        $this->assertFalse($bag->has('warning'));
+        $this->assertEquals(2, $bag->count());
+
+        $successList = $bag->get('success');
+        $this->assertCount(1, $successList);
+        $this->assertEquals('Profile updated successfully!', $successList[0]->getMessage());
+        $this->assertEquals('Success', $successList[0]->getTitle());
+
+        // Global flash() helper
+        flash()->warning('Low storage remaining');
+        $this->assertTrue(flash()->has('warning'));
+        $this->assertEquals(3, flash()->count());
+    }
+
+    public function testFlashRendererToastAndAlertModes(): void
+    {
+        $manager = new SessionManager(['driver' => 'array']);
+        SessionManager::setInstance($manager);
+        $store = $manager->store();
+        $store->start();
+        Session::setStore($store);
+
+        flash()->success('Operation completed successfully!');
+        flash()->error('Something went wrong.');
+
+        $renderer = new \Switch\Session\Flash\FlashRenderer();
+
+        // 1. Toast render mode
+        $toastHtml = $renderer->render('toast', ['position' => 'bottom-right']);
+        $this->assertStringContainsString('switch-flash-toast-deck', $toastHtml);
+        $this->assertStringContainsString('pos-bottom-right', $toastHtml);
+        $this->assertStringContainsString('Operation completed successfully!', $toastHtml);
+        $this->assertStringContainsString('Something went wrong.', $toastHtml);
+
+        // 2. Alert render mode
+        $alertHtml = $renderer->render('alert');
+        $this->assertStringContainsString('switch-flash-alerts-container', $alertHtml);
+        $this->assertStringContainsString('switch-flash-alert switch-flash-success', $alertHtml);
+        $this->assertStringContainsString('switch-flash-alert switch-flash-error', $alertHtml);
+    }
+
+    public function testFlashMessageEscapingAndRawOption(): void
+    {
+        $safeMsg = new \Switch\Session\Flash\FlashMessage('info', '<script>alert("xss")</script>');
+        $this->assertEquals('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;', $safeMsg->getEscapedMessage());
+
+        $rawMsg = new \Switch\Session\Flash\FlashMessage('info', '<strong>Bold Message</strong>', null, ['raw' => true]);
+        $this->assertEquals('<strong>Bold Message</strong>', $rawMsg->getEscapedMessage());
+    }
 }

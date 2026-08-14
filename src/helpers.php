@@ -85,3 +85,60 @@ if (!function_exists('csrf_field')) {
         return '<input type="hidden" name="_token" value="' . $token . '">';
     }
 }
+
+if (!function_exists('flash')) {
+    /**
+     * Flash a message to the session or get the FlashBag instance.
+     *
+     * @param string|null $type ('success', 'error', 'warning', 'info')
+     * @param string|null $message
+     * @param string|null $title
+     * @param array<string, mixed> $options
+     * @return \Switch\Session\Flash\FlashBag|\Switch\Session\Flash\FlashMessage
+     */
+    function flash(?string $type = null, ?string $message = null, ?string $title = null, array $options = []): mixed
+    {
+        static $bag = null;
+        $bag ??= new \Switch\Session\Flash\FlashBag();
+
+        if ($type === null) {
+            return $bag;
+        }
+
+        if ($message === null) {
+            return $bag->get($type);
+        }
+
+        return $bag->add($type, $message, $title, $options);
+    }
+}
+
+if (!function_exists('flash_render')) {
+    /**
+     * Render the flash messages to HTML (as toasts or alerts).
+     *
+     * @param string $mode 'toast' or 'alert'
+     * @param array<string, mixed> $options
+     * @return string
+     */
+    function flash_render(string $mode = 'toast', array $options = []): string
+    {
+        $renderer = new \Switch\Session\Flash\FlashRenderer();
+        return $renderer->render($mode, $options);
+    }
+}
+
+if (!function_exists('flash_messages')) {
+    /**
+     * Alias for flash_render.
+     *
+     * @param string $mode 'toast' or 'alert'
+     * @param array<string, mixed> $options
+     * @return string
+     */
+    function flash_messages(string $mode = 'toast', array $options = []): string
+    {
+        return flash_render($mode, $options);
+    }
+}
+
