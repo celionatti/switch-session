@@ -1,0 +1,36 @@
+{
+    "name": "switch/session",
+    "description": "High-performance session, cookie, flash, and CSRF protection package for the Switch Framework",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Celio Natti",
+            "email": "celionatti@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "psr/http-message": "^1.1 || ^2.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/http-server-handler": "^1.0"
+    },
+    "suggest": {
+        "switch/database": "To store sessions in a database table via DatabaseSessionHandler",
+        "switch/view": "For seamless {!! csrf_field() !!} and session view integration"
+    },
+    "autoload": {
+        "psr-4": {
+            "Switch\\Session\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Switch\\Session\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable"
+}
